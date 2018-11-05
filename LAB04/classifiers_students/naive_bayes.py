@@ -14,14 +14,12 @@ class NaiveBayesNominal:
     def fit(self, input_data: np.array, y: np.array):
         self.y_prior = y
         classes_ = set(y)
-        for c in classes_:
-            class_samples_amount = len([a for a in y if a == c])
-            self.classes.update({c: class_samples_amount})
+        for class_ in classes_:
+            class_samples_amount = len([a for a in y if a == class_])
+            self.classes.update({class_: class_samples_amount})
 
         self.compute_classes_prob()
         self.compute_features_prob(input_data)
-
-        print(self.model)
 
     def compute_classes_prob(self):
         samples_amount = sum(self.classes.values())
@@ -51,11 +49,56 @@ class NaiveBayesNominal:
                 tuple_prob = counter / self.classes.get(_class)
                 self.model.update({ref_tuple: tuple_prob})
 
-    def predict_proba(self, x):
-        raise NotImplementedError
+    def predict_proba(self, x: np.array):
+        number_of_classes = len(self.classes.keys())
+        computed_probs = np.append(number_of_classes, 0.0)
+        for class_index in range(number_of_classes):
+            prob = self.compute_prob_for_class(class_index, x)
+            computed_probs[class_index] = prob
+
+        return computed_probs
+
+    def compute_prob_for_class(self, class_index, x):
+        denom = 0.0
+        input_features_vector = x
+        all_classes = set(self.classes.keys())
+
+        nom = self.method_name(class_index, input_features_vector)
+        for class_index in all_classes:
+            denom += self.method_name(class_index, input_features_vector)
+
+        prob = nom / denom
+        return prob
+
+    def method_name(self, class_index, x):
+        feature_id = 1
+        result = 1.0
+        for feature_value in x:
+            query_tuple = (feature_id, feature_value, class_index)
+            tuple_prob = self.model.get(query_tuple)
+            result *= tuple_prob
+            feature_id += 1
+        result = result * self.classes_prob.get(class_index)
+
+        return result
 
     def predict(self, x):
-        raise NotImplementedError
+        input_vectors_number = x.shape[0]
+        output_vector = np.zeros(input_vectors_number, int)
+        for i in range(input_vectors_number):
+            probs = self.predict_proba(x[i])
+            output_vector[i] = self.get_class_index_with_max_prob(probs)
+        return output_vector
+
+    @staticmethod
+    def get_class_index_with_max_prob(probs):
+        index_to_return = -1
+        max_prob = 0
+        for index in range(len(probs)):
+            if max_prob < probs[index]:
+                max_prob = probs[index]
+                index_to_return = index
+        return index_to_return
 
 
 class NaiveBayesGaussian:
