@@ -11,7 +11,9 @@ test_set = map_input(test_set)
 training_set_x = training_set.loc[:, training_set.columns != 'grypa'].values
 training_set_y = training_set.grypa.values
 test_set = test_set.values
-print(training_set_y)
 nb = NaiveBayesNominal()
 nb.fit(training_set_x, training_set_y)
+print(nb.predict(test_set))
+print("--------------")
+print(training_set_y)
 print(nb.predict(training_set_x))
