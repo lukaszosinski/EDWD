@@ -60,15 +60,15 @@ class NaiveBayesNominal:
         return computed_probs
 
     def __compute_prob_for_class(self, class_, x):
-        nominator = self.__some_method_with_no_name(class_, x)
+        nominator = self.__compute_partial_prob_for_class(class_, x)
         denominator = 0.0
         for c in self.classes:
-            denominator += self.__some_method_with_no_name(c, x)
+            denominator += self.__compute_partial_prob_for_class(c, x)
         prob = nominator / denominator
 
         return prob
 
-    def __some_method_with_no_name(self, class_, x):
+    def __compute_partial_prob_for_class(self, class_, x):
         feature_id = 1
         result = 1.0
         for feature_value in x:
@@ -97,20 +97,6 @@ class NaiveBayesNominal:
                 max_prob = classes_probabilities[class_index]
                 index_to_return = class_index
         return index_to_return
-
-
-class NaiveBayesGaussian:
-    def __init__(self):
-        raise NotImplementedError
-
-    def fit(self, X, y):
-        raise NotImplementedError
-
-    def predict_proba(self, X):
-        raise NotImplementedError
-
-    def predict(self, X):
-        raise NotImplementedError
 
 
 class NaiveBayesNumNom(BaseEstimator):
